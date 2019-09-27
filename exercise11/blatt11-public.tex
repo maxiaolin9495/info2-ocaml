@@ -1,0 +1,374 @@
+\documentclass[
+  %solution,
+  english
+	%german
+]{tumteaching}
+
+\usepackage{listings}
+\usepackage{paralist}
+
+\usepackage{mathpartir}
+\usepackage{stmaryrd}
+\usepackage{braket}
+\usepackage[inline]{enumitem}
+\usepackage{amsmath,amsthm}
+\usepackage{multirow}
+\usepackage{url}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{centernot}
+\usepackage{multicol}
+\usepackage{adjustbox}
+\usepackage{ltablex}
+\usepackage{comment}
+\usepackage{svg}
+
+\usepackage{info2}
+
+\usetikzlibrary{decorations.pathmorphing}
+\usetikzlibrary{shapes.callouts}
+
+\tikzset{snake it/.style={decorate, decoration=snake}}
+
+\ExplSyntaxOn%
+\tl_gset:Nn \g_tumteaching_date_tl {WS~2018/19}
+\tl_gset:Nn \g_tumteaching_exsheet_nr_tl {11}
+\tl_gset:Nn \g_tumteaching_exsheet_deadline_tl {20.01.2019}
+\ExplSyntaxOff%
+
+\newcommand{\objective}[1]{\item \small{#1}}
+%\newcommand{\mydottedline}[0]{...}
+\newcommand{\mydotline}{\makebox[2.0in]{\dotfill}}
+\newcolumntype{C}{>{\centering\arraybackslash}X}
+\newcommand{\qsmio}[1]{\text{\mintinline{ocaml}{#1}}}
+
+
+\begin{document}
+
+\verticalline
+\begin{disclaimer}{General Information}
+	Detailed information about the lecture, tutorials and homework assignments can be found on the lecture website\footnote{\url{https://www.in.tum.de/i02/lehre/wintersemester-1819/vorlesungen/functional-programming-and-verification/}}. Solutions have to be submitted to Moodle\footnote{\url{https://www.moodle.tum.de/course/view.php?id=44932}}. Make sure your uploaded documents are readable. Blurred images will be rejected. Use Piazza\footnote{\url{https://piazza.com/tum.de/fall2018/in0003/home}} to ask questions and discuss with your fellow students.
+\end{disclaimer}
+
+\verticalline
+\vspace*{-5mm}
+
+\begin{disclaimer}{Big-step proofs}
+  Unless specified otherwise, all rules used in a big-step proof tree must be annotated and all axioms ($v \R v$) must be written down.
+\end{disclaimer}
+
+\verticalline
+
+%\begin{disclaimer}{Functional Programming}
+%	Since this is a course about functional programming, we restrict ourselves to the functional features of OCaml. In other words: The imperative and object oriented subset of OCaml must not be used.
+%\end{disclaimer}
+
+%\vphantom{\begin{assignment}[L]{A} \end{assignment}}
+%\vphantom{\begin{assignment}[L]{A} \end{assignment}}
+%\vphantom{\begin{assignment}[L]{A} \end{assignment}}
+%\vphantom{\begin{assignment}[L]{A} \end{assignment}}
+%\vspace*{-10mm}
+
+\begin{assignment}[L]{Big Steps}
+  We define these functions:
+  \begin{minted}{ocaml}
+let rec f = fun l ->
+  match l with [] -> 1 | x::xs -> x + g xs
+and g = fun l ->
+  match l with [] -> 0 | x::xs -> x * f xs
+  \end{minted}
+  Consider the following expressions. Find the values they evaluate to and construct a big-step proof for that claim.
+  \begin{enumerate}
+    \item \mio{let f = fun a -> (a+1,a-1)::[] in f 7}
+    \item \mio{f [3;6]}
+    \item \mio{(fun x -> x 3) (fun y z -> z y) (fun w -> w + w)}
+  \end{enumerate}
+
+
+  \begin{solution}
+
+  \begin{enumerate}
+
+  \item Big step tree:
+
+\hspace*{ -3em }\scalebox{ 1 }{\parbox{ 1\linewidth }{%
+\begin{align*}
+\pi_{ 0 } &= \inferrule*[left=LI]{  \inferrule*[left=TU]{  \inferrule*[left=OP]{ \qsmio{7} \R \qsmio{7}\;\; \qsmio{1} \R \qsmio{1}\;\; 7 \textcolor{red}{+} 1 \R \qsmio{8} }{ \qsmio{7+1} \R \qsmio{8} } \inferrule*[left=OP]{ \qsmio{7} \R \qsmio{7}\;\; \qsmio{1} \R \qsmio{1}\;\; 7 \textcolor{red}{-} 1 \R \qsmio{6} }{ \qsmio{7-1} \R \qsmio{6} } }{ \qsmio{(7+1,7-1)} \R \qsmio{(8,6)} } }{ \qsmio{[(7+1,7-1)]} \R \qsmio{[(8,6)]} }\\
+\end{align*}
+}}
+
+\hspace*{ -2em }\scalebox{ 0.7 }{
+
+$\inferrule*[left=LD]{ \qsmio{fun a -> [(a+1,a-1)]} \R \qsmio{fun a -> [(a+1,a-1)]}\;\; \inferrule*[left=APP']{ \qsmio{fun a -> [(a+1,a-1)]} \R \qsmio{fun a -> [(a+1,a-1)]}\;\;  \qsmio{7} \R \qsmio{7}\;\; \pi_{ 0 } }{ \qsmio{(fun a -> [(a+1,a-1)]) 7} \R \qsmio{[(8,6)]} } }{ \qsmio{let f = fun a -> [(a+1,a-1)] in f 7} \R \qsmio{[(8,6)]} }$
+
+}
+
+  \vspace*{5mm}
+
+  \item Big step tree:
+
+\hspace*{ -3em }\scalebox{ 0.5 }{\parbox{ 2\linewidth }{%
+\begin{align*}
+\pi_{ f } &= \inferrule*[left=GD]{ \qsmio{f} = \qsmio{fun l -> match l with [] -> 1 | x::xs -> x+g xs}\;\; \qsmio{fun l -> match l with [] -> 1 | x::xs -> x+g xs} \R \qsmio{fun l -> match l with [] -> 1 | x::xs -> x+g xs} }{ \qsmio{f} \R \qsmio{fun l -> match l with [] -> 1 | x::xs -> x+g xs} }\\
+\pi_{ g } &= \inferrule*[left=GD]{ \qsmio{g} = \qsmio{fun l -> match l with [] -> 0 | x::xs -> x*f xs}\;\; \qsmio{fun l -> match l with [] -> 0 | x::xs -> x*f xs} \R \qsmio{fun l -> match l with [] -> 0 | x::xs -> x*f xs} }{ \qsmio{g} \R \qsmio{fun l -> match l with [] -> 0 | x::xs -> x*f xs} }\\
+\pi_{ 0 } &= \inferrule*[left=PM]{ \qsmio{[6]} \R \qsmio{[6]}\;\; \inferrule*[left=OP]{ \qsmio{6} \R \qsmio{6}\;\; \inferrule*[left=APP']{ \pi_{ f }\;\;  \qsmio{[]} \R \qsmio{[]}\;\; \inferrule*[left=PM]{ \qsmio{[]} \R \qsmio{[]}\;\; \qsmio{1} \R \qsmio{1} }{ \qsmio{match [] with [] -> 1 | x::xs -> x+g xs} \R \qsmio{1} } }{ \qsmio{f []} \R \qsmio{1} }\;\; 6 \textcolor{red}{*} 1 \R \qsmio{6} }{ \qsmio{6*f []} \R \qsmio{6} } }{ \qsmio{match [6] with [] -> 0 | x::xs -> x*f xs} \R \qsmio{6} }\\
+\end{align*}
+}}
+\hspace*{ -3em }\scalebox{ 1 }{
+
+$\inferrule*[left=APP']{ \pi_{ f }\;\;  \qsmio{[3;6]} \R \qsmio{[3;6]}\;\; \inferrule*[left=PM]{ \qsmio{[3;6]} \R \qsmio{[3;6]}\;\; \inferrule*[left=OP]{ \qsmio{3} \R \qsmio{3}\;\; \inferrule*[left=APP']{ \pi_{ g }\;\;  \qsmio{[6]} \R \qsmio{[6]}\;\; \pi_{ 0 } }{ \qsmio{g [6]} \R \qsmio{6} }\;\; 3 \textcolor{red}{+} 6 \R \qsmio{9} }{ \qsmio{3+g [6]} \R \qsmio{9} } }{ \qsmio{match [3;6] with [] -> 1 | x::xs -> x+g xs} \R \qsmio{9} } }{ \qsmio{f [3;6]} \R \qsmio{9} }$
+
+}
+
+  \vspace*{5mm}
+
+  \item Big step tree:
+
+\hspace*{ -3em }\scalebox{ 0.5 }{\parbox{ 2\linewidth }{%
+\begin{align*}
+\pi_{ 0 } &= \inferrule*[left=APP']{ \qsmio{fun x -> x 3} \R \qsmio{fun x -> x 3}\;\;  \qsmio{fun y z -> z y} \R \qsmio{fun y z -> z y}\;\; \inferrule*[left=APP']{ \qsmio{fun y z -> z y} \R \qsmio{fun y z -> z y}\;\;  \qsmio{3} \R \qsmio{3}\;\; \qsmio{fun z -> z 3} \R \qsmio{fun z -> z 3} }{ \qsmio{(fun y z -> z y) 3} \R \qsmio{fun z -> z 3} } }{ \qsmio{(fun x -> x 3) (fun y z -> z y)} \R \qsmio{fun z -> z 3} }\\
+\end{align*}
+}}
+
+\hspace*{ -3em }\scalebox{ 0.7 }{
+
+$\inferrule*[left=APP']{ \pi_{ 0 }\;\;  \qsmio{fun w -> w+w} \R \qsmio{fun w -> w+w}\;\; \inferrule*[left=APP']{ \qsmio{fun w -> w+w} \R \qsmio{fun w -> w+w}\;\;  \qsmio{3} \R \qsmio{3}\;\; \inferrule*[left=OP]{ \qsmio{3} \R \qsmio{3}\;\; \qsmio{3} \R \qsmio{3}\;\; 3 \textcolor{red}{+} 3 \R \qsmio{6} }{ \qsmio{3+3} \R \qsmio{6} } }{ \qsmio{(fun w -> w+w) 3} \R \qsmio{6} } }{ \qsmio{(fun x -> x 3) (fun y z -> z y) (fun w -> w+w)} \R \qsmio{6} }$
+
+}
+
+  \end{enumerate}
+  \end{solution}
+
+\end{assignment}
+
+
+
+\begin{assignment}[L]{Multiplication}
+  Prove that the function
+  \begin{minted}{ocaml}
+let rec mul a b =
+  match a with 0 -> 0 | _ -> b + mul (a-1) b
+  \end{minted}
+  terminates for all inputs $a, b \geq 0$.
+
+
+  \begin{solution}
+  We prove by induction on \mio{a} that \mio{mul a b} terminates with $a*b$:
+  \begin{itemize}
+    \item Base case: \mio{a = 0}:
+
+    $\inferrule*[left=APP]{
+      \pi_{mul}\;\;
+      \inferrule*[left=PM]{
+      }{
+        \qsmio{match 0 with 0 -> 0 | _ -> b + mul (-1) b} \R \qsmio{0}
+      }
+    }{
+      \qsmio{mul 0 b} \R \qsmio{0}
+    }$
+
+    \item Inductive case: Assume \mio{mul a b} terminates for an $a \geq 0$. Now, we show that it also terminates for $a+1$:
+
+    $\inferrule*[left=APP]{
+      \pi_{mul}\;\;
+      \inferrule*[left=PM]{
+        \inferrule*[left=OP]{
+          \inferrule*[left=APP]{
+            \mbox{by I.H.}
+          }{
+            \qsmio{mul (a+1-1) b} \R a*b
+          }
+          b \; \textcolor{red}{+} \; (a*b) \R (a+1)*b
+        }{
+          \qsmio{b + mul (a+1-1) b} \R (a+1)*b
+        }
+      }{
+        \qsmio{match a+1 with 0 -> 0 | _ -> b + mul (a+1-1) b} \R (a+1)*b
+      }
+    }{
+      \qsmio{mul (a+1) b} \R (a+1)*b
+    }$
+    Here $\pi_{mul}$ is the GD-tree of \mio{mul}. Note one important thing here: When reducing to the induction hypothesis, we do not apply the operator rule for the \mio{a+1-1} term, since $a+1$ is not really an OCaml expression, but the successor of $a$. We silently simplify $a+1-1$ to $a$ and apply the induction hypothesis.
+  \end{itemize}
+  \qed
+  \end{solution}
+
+
+
+\end{assignment}
+
+
+\begin{assignment}[L]{Threesum}
+  Use big-step operational semantics to show that the function
+    \begin{minted}{ocaml}
+let rec threesum = fun l ->
+  match l with [] -> 0 | x::xs -> 3*x + threesum xs
+    \end{minted}
+    terminates for all inputs and computes three times the sum of the input list's elements.
+
+
+    \begin{solution}
+      We define:
+        \begin{align*}
+            \pi_{ts} &= \inferrule*[left=GD]{
+                \qsmio{threesum = fun l -> match l with [] -> 0 | x::xs -> 3*x + threesum xs}
+            }{
+                \qsmio{threesum} \R \qsmio{fun l -> match l with [] -> 0 | x::xs -> 3*x + threesum xs}
+            }
+        \end{align*}
+
+        Now, we do an induction on the length $n$ of the list.
+        \begin{itemize}
+        \item Base case: $n=0$ (\mio{l = []})
+
+        \hspace*{-1cm}\scalebox{0.7}{
+        $\inferrule*[left=APP]{
+            \pi_{ts}\;\;
+            \qsmio{[]} \R \qsmio{[]}\;\;
+            \inferrule*[left=PM]{
+                \qsmio{[]} \R \qsmio{[]}\;\;
+                \qsmio{0} \R \qsmio{0}
+            }{
+                \qsmio{match [] with [] -> 0 | x::xs -> 3*x + threesum xs} \R \qsmio{0}
+            }
+        }{
+            \qsmio{threesum []} \R \qsmio{0}
+        }$
+        }
+
+        \item Inductive step: We assume \mio{threesum xs} terminates with $3\sum_{i=1}^{n} x_i$ for an input \mio{xs = [}$x_n;\dotsc;x_1$\mio{]} of length $n \geq 0$.
+          Now, show that \mio{threesum }$\;x_{n+1}$\mio{::xs} terminates with $3\sum_{i=1}^{n+1} x_i$:
+
+        \hspace*{-2cm}\scalebox{0.6}{
+        $\inferrule*[left=APP]{
+            \pi_{ts}\;\;
+            x_{n+1}\qsmio{::xs} \R x_{n+1}\qsmio{::xs}
+            \inferrule*[left=PM]{
+                x_{n+1}\qsmio{::xs} \R x_{n+1}\qsmio{::xs}\;\;
+                \inferrule*[left=OP]{
+                    \inferrule*[left=OP]{
+                        \qsmio{3} \R \qsmio{3}\;\;
+                        x_{n+1} \R x_{n+1}\;\;
+                        \texttt{3}\textcolor{red}{*}x_{n+1} \R 3x_{n+1}
+                    }{
+                        3*x_{n+1} \R 3x_{n+1}
+                    }
+                    \inferrule*[left=APP]{
+                        \texttt{by I.H.}
+                    }{
+                        \qsmio{threesum xs} \R 3\sum_{i=1}^{n} x_i
+                    }
+                    3x_{n+1}\textcolor{red}{+}3\sum_{i=1}^{n} x_i \R 3\sum_{i=1}^{n+1} x_i
+                }{
+                    \qsmio{3*}x_{n+1}\qsmio{ + threesum xs} \R 3\sum_{i=1}^{n+1} x_i
+                }
+            }{
+                \qsmio{match }\;x_{n+1}\qsmio{::xs with [] -> 0 | x::xs -> 3*x + threesum xs} \R 3\sum_{i=1}^{n+1} x_i
+            }
+        }{
+            \qsmio{threesum (}x_{n+1}\qsmio{::xs)} \R 3\sum_{i=1}^{n+1} x_i
+        }$
+        }
+        \hfill \qed
+        \end{itemize}
+    \end{solution}
+
+\end{assignment}
+
+
+
+\begin{assignment}[L]{Records}
+Let MiniOCaml++ be an extended version of MiniOCaml that comes with records. Perform these tasks:
+\begin{enumerate}
+  \item Extend the operational big-step semantics of MiniOCaml for these new expressions.
+  \item Construct a big-step proof for the value of this expression:
+  \begin{center}
+    \mio{let r = { x={ a=3+5; b=2+4::[] }; y=2*7 } in r.x.a::r.x.b}
+  \end{center}
+\end{enumerate}
+
+
+\begin{solution}
+
+\begin{enumerate}
+  \item We need two new rules for the record evaluation ($RE$) and record access ($RA$):
+    \begin{itemize}
+      \item $\inferrule*[left=RE]{ {e_1 \R v_1} \;\; \dotsc \;\; {e_n \R v_n} }{\{ a_1=e_1; \; \dotsc \; a_n=e_n \} \R \{ a_1=v_1; \; \dotsc \; a_n=v_n \}}$
+      \item $\inferrule*[left=RA]{ {e \R \{ \; \dotsc \; a=v; \; \dotsc \; \}} }{e.a \R v}$
+    \end{itemize}
+  \item The big-step tree:
+
+\hspace*{ -3em }\scalebox{ 0.9 }{\parbox{ 1.2\linewidth }{%
+\begin{align*}
+\pi_{ 0 } &= \inferrule*[left=RE]{  \inferrule*[left=RE]{  \inferrule*[left=OP]{ \qsmio{3} \R \qsmio{3}\;\; \qsmio{5} \R \qsmio{5}\;\; 3 \textcolor{red}{+} 5 \R \qsmio{8} }{ \qsmio{3+5} \R \qsmio{8} } \inferrule*[left=LI]{  \inferrule*[left=OP]{ \qsmio{2} \R \qsmio{2}\;\; \qsmio{4} \R \qsmio{4}\;\; 2 \textcolor{red}{+} 4 \R \qsmio{6} }{ \qsmio{2+4} \R \qsmio{6} } }{ \qsmio{[2+4]} \R \qsmio{[6]} } }{ \qsmio{{ a=3+5; b=[2+4] }} \R \qsmio{{ a=8; b=[6] }} } \inferrule*[left=OP]{ \qsmio{2} \R \qsmio{2}\;\; \qsmio{7} \R \qsmio{7}\;\; 2 \textcolor{red}{*} 7 \R \qsmio{14} }{ \qsmio{2*7} \R \qsmio{14} } }{ \qsmio{{ x={ a=3+5; b=[2+4] }; y=2*7 }} \R \qsmio{{ x={ a=8; b=[6] }; y=14 }} }\\
+\pi_{ 1 } &= \inferrule*[left=RA]{ \inferrule*[left=RA]{ \qsmio{{ x={ a=8; b=[6] }; y=14 }} \R \qsmio{{ x={ a=8; b=[6] }; y=14 }} }{ \qsmio{{ x={ a=8; b=[6] }; y=14 }} \R \qsmio{{ x={ a=8; b=[6] }; y=14 }} } }{ \qsmio{{ x={ a=8; b=[6] }; y=14 }.x} \R \qsmio{{ a=8; b=[6] }} }\\
+\pi_{ 2 } &= \inferrule*[left=RA]{ \inferrule*[left=RA]{ \qsmio{{ x={ a=8; b=[6] }; y=14 }} \R \qsmio{{ x={ a=8; b=[6] }; y=14 }} }{ \qsmio{{ x={ a=8; b=[6] }; y=14 }} \R \qsmio{{ x={ a=8; b=[6] }; y=14 }} } }{ \qsmio{{ x={ a=8; b=[6] }; y=14 }.x} \R \qsmio{{ a=8; b=[6] }} }\\
+\end{align*}
+}}
+
+\hspace*{ -3em }\scalebox{ 1 }{
+
+$\inferrule*[left=LD]{ \pi_{ 0 }\;\; \inferrule*[left=LI]{ \pi_{ 1 }\;\; \pi_{ 2 } }{ \qsmio{{ x={ a=8; b=[6] }; y=14 }.x.a::{ x={ a=8; b=[6] }; y=14 }.x.b} \R \qsmio{[8;6]} } }{ \qsmio{let r = { x={ a=3+5; b=[2+4] }; y=2*7 } in r.x.a::r.x.b} \R \qsmio{[8;6]} }$
+
+}
+
+  \end{enumerate}
+\end{solution}
+
+
+
+\end{assignment}
+
+
+
+\begin{assignment}[H,points=12]{More Big Steps}
+  Globally defined are these functions:
+  \begin{minted}{ocaml}
+let rec map = fun f l ->
+  match l with [] -> [] | x::xs -> f x :: map f xs
+and fold_left = fun f a l ->
+  match l with [] -> a | x::xs -> fold_left f (f a x) xs
+and comp = fun f g x -> f (g x)
+and mul = fun a b -> a * b
+and id = fun x -> x
+  \end{minted}
+  Give big-step proofs for the following claims:
+  \begin{enumerate}
+    \item $\qsmio{fold_left mul 3 [10]} \R \qsmio{30}$
+    \item $\qsmio{(let a = comp (fun x -> 2 * x) in a (fun x -> x + 3)) 4} \R \qsmio{14}$
+    \item $\qsmio{map (id id) [8]} \R \qsmio{[8]}$
+  \end{enumerate}
+
+\end{assignment}
+
+
+
+
+\begin{assignment}[H,points=4]{Computing Zero}
+  Consider the function \mio{foo}:
+  \begin{minted}{ocaml}
+let rec foo = fun l ->
+  match l with [] -> 0
+  | 0::xs -> foo xs
+  | x::xs -> if x > 0 then foo (x-1::xs) else foo (x+1::xs)
+  \end{minted}
+  Prove that \mio{foo} terminates for all inputs. Axioms ($v \R v$) may be omitted.
+
+\end{assignment}
+
+\begin{assignment}[H,points=4]{Raise the bar!}
+  Given are these definitions:
+  \begin{minted}{ocaml}
+let rec impl = fun n a ->
+  match n with 0 -> a | _ -> impl (n-1) (a * n * n)
+and bar = fun n -> impl n 1
+  \end{minted}
+  Prove that \mio{bar n} terminates with $n! * n!$ for all non-negative inputs $n$. Axioms ($v \R v$) may be omitted.
+
+  \end{assignment}
+\end{document}
+
+
+
+
+
+
